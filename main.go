@@ -15,14 +15,18 @@ func main() {
 	logger := log.NewLogfmtLogger(os.Stderr)
 	var svc StringService
 	svc = stringService{}
-	svc = appLoggingMiddleware{logger, svc}
+	svc = proxyingMiddleware("http://lowercase:80", ctx)(svc)
+	svc = loggingMiddleware(logger)(svc)
 
 	uppercase := makeUppercaseEndpoint(svc)
 	uppercase = transportLoggingMiddleware(log.NewContext(logger).With("method", "uppercase"))(uppercase)
 
 	count := makeCountEndpoint(svc)
 	count = transportLoggingMiddleware(log.NewContext(logger).With("method", "count"))(count)
-	//
+
+	lowercase := makeLowercaseEndpoint(svc)
+	lowercase = transportLoggingMiddleware(log.NewContext(logger).With("method", "lowercase"))(lowercase)
+
 	uppercaseHandler := httptransport.NewServer(
 		ctx,
 		uppercase,
@@ -37,7 +41,15 @@ func main() {
 		encodeResponse,
 	)
 
+	lowercaseHandler := httptransport.NewServer(
+		ctx,
+		lowercase,
+		decodeLowercaseRequest,
+		encodeResponse,
+	)
+
 	http.Handle("/uppercase", uppercaseHandler)
 	http.Handle("/count", countHandler)
+	http.Handle("/lowercase", lowercaseHandler)
 	logger.Log(http.ListenAndServe(":1337", nil))
 }

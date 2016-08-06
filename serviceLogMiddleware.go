@@ -11,6 +11,12 @@ type appLoggingMiddleware struct {
 	next   StringService
 }
 
+func loggingMiddleware(logger log.Logger) ServiceMiddleware {
+	return func(next StringService) StringService {
+		return appLoggingMiddleware{logger, next}
+	}
+}
+
 func (mw appLoggingMiddleware) Uppercase(s string) (output string, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log(
@@ -35,5 +41,19 @@ func (mw appLoggingMiddleware) Count(s string) (n int) {
 		)
 	}(time.Now())
 	n = mw.next.Count(s)
+	return
+}
+
+func (mw appLoggingMiddleware) Lowercase(s string) (output string, err error) {
+	defer func(begin time.Time) {
+		mw.logger.Log(
+			"method", "lowercase",
+			"input", s,
+			"output", output,
+			"err", err,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	output, err = mw.next.Lowercase(s)
 	return
 }

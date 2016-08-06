@@ -12,6 +12,7 @@ type ServiceMiddleware func(StringService) StringService
 type StringService interface {
 	Uppercase(string) (string, error)
 	Count(string) int
+	Lowercase(string) (string, error)
 }
 
 type stringService struct{}
@@ -29,4 +30,9 @@ func (stringService) Uppercase(s string) (string, error) {
 
 func (stringService) Count(s string) int {
 	return len(s)
+}
+
+// Placeholder, we won't use it
+func (stringService) Lowercase(s string) (string, error) {
+	return "", nil
 }

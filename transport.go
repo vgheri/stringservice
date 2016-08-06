@@ -29,6 +29,15 @@ type countResponse struct {
 	V int `json:"v"`
 }
 
+type lowercaseRequest struct {
+	S string `json:"s"`
+}
+
+type lowercaseResponse struct {
+	S   string `json:"s"`
+	Err string `json:"err, omitemtpy"`
+}
+
 /// Endpoints definition
 func makeUppercaseEndpoint(svc StringService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
@@ -46,6 +55,17 @@ func makeCountEndpoint(svc StringService) endpoint.Endpoint {
 		req := request.(countRequest)
 		res := svc.Count(req.S)
 		return countResponse{res}, nil
+	}
+}
+
+func makeLowercaseEndpoint(svc StringService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(lowercaseRequest)
+		res, err := svc.Lowercase(req.S)
+		if err != nil {
+			return lowercaseResponse{req.S, err.Error()}, nil
+		}
+		return lowercaseResponse{res, ""}, nil
 	}
 }
 
@@ -67,20 +87,28 @@ func decodeUppercaseRequest(ctx context.Context, req *http.Request) (interface{}
 	return request, nil
 }
 
-func decodeUppercaseResponse(_ context.Context, w *http.Response) (interface{}, error) {
-	var response uppercaseResponse
-	if err := json.NewDecoder(w.Body).Decode(response); err != nil {
-		return nil, err
-	}
-	return response, nil
-}
-
 func decodeCountRequest(ctx context.Context, req *http.Request) (interface{}, error) {
 	var request countRequest
 	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
 		return nil, err
 	}
 	return request, nil
+}
+
+func decodeLowercaseRequest(ctx context.Context, req *http.Request) (interface{}, error) {
+	var request lowercaseRequest
+	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+	return request, nil
+}
+
+func decodeLowercaseResponse(_ context.Context, w *http.Response) (interface{}, error) {
+	var response lowercaseResponse
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+	return response, nil
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, res interface{}) error {
