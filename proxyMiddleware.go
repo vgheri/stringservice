@@ -5,8 +5,11 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/go-kit/kit/circuitbreaker"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/sony/gobreaker"
 
+	log "github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"golang.org/x/net/context"
 )
@@ -37,9 +40,16 @@ func (mw proxy) Lowercase(s string) (string, error) {
 	return resp.S, nil
 }
 
-func proxyingMiddleware(proxyURL string, ctx context.Context) ServiceMiddleware {
+func proxyingMiddleware(proxyURL string, logger log.Logger, ctx context.Context) ServiceMiddleware {
 	return func(next StringService) StringService {
-		return proxy{ctx, next, makeLowercaseProxy(proxyURL, ctx)}
+		lowercaseEndpoint := makeLowercaseProxy(proxyURL, ctx)
+		st := gobreaker.Settings{}
+		st.Name = "StringServiceToLowercase"
+		st.OnStateChange = func(name string, from gobreaker.State, to gobreaker.State) {
+			logger.Log("CircuitBreaker", "from "+from.String()+" to "+to.String())
+		}
+		lowercaseEndpoint = circuitbreaker.Gobreaker(gobreaker.NewCircuitBreaker(st))(lowercaseEndpoint)
+		return proxy{ctx, next, lowercaseEndpoint}
 	}
 }
 

@@ -15,7 +15,7 @@ func main() {
 	logger := log.NewLogfmtLogger(os.Stderr)
 	var svc StringService
 	svc = stringService{}
-	svc = proxyingMiddleware("http://lowercase:80", ctx)(svc)
+	svc = proxyingMiddleware("http://lowercase:80/", logger, ctx)(svc)
 	svc = loggingMiddleware(logger)(svc)
 
 	uppercase := makeUppercaseEndpoint(svc)
