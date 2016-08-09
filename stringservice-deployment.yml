@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: stringservice
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: stringservice
+    spec:
+      containers:
+      - name: stringservice
+        image: valeriogheri/stringservice:1.0.0
+        ports:
+        - containerPort: 1337
+        imagePullPolicy: IfNotPresent

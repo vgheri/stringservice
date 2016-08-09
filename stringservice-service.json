@@ -1,0 +1,21 @@
+{
+    "kind": "Service",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "stringservice",
+        "labels": {"app": "stringservice"}
+    },
+    "spec": {
+        "selector": {
+            "app": "stringservice"
+        },
+        "ports": [
+            {
+                "protocol": "TCP",
+                "port": 80,
+                "targetPort": 1337
+            }
+        ],
+        "type": "LoadBalancer"
+    }
+}
