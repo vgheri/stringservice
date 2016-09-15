@@ -14,8 +14,7 @@ type TransportMiddleware func(endpoint.Endpoint) endpoint.Endpoint
 func transportLoggingMiddleware(logger log.Logger) TransportMiddleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {
-			logger.Log("msg", "calling endpoint")
-			defer logger.Log("msg", "called endpoint")
+			logger.Log("requestID", ctx.Value("requestID"))
 			return next(ctx, request)
 		}
 	}

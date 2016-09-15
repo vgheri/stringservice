@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 
 	"github.com/go-kit/kit/endpoint"
+	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/nu7hatch/gouuid"
 	"golang.org/x/net/context"
 )
 
@@ -113,4 +115,22 @@ func decodeLowercaseResponse(_ context.Context, w *http.Response) (interface{}, 
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, res interface{}) error {
 	return json.NewEncoder(w).Encode(res)
+}
+
+/*
+	Server before functions, executed on the HTTP request before req is decoded
+*/
+
+func setRequestIDInContext() httptransport.RequestFunc {
+	return func(ctx context.Context, request *http.Request) context.Context {
+		reqID := request.Header.Get("X-Request-ID")
+		if reqID == "" {
+			u, err := uuid.NewV4()
+			if err == nil {
+				reqID = u.String()
+			}
+		}
+		request.Header.Set("X-Request-ID", reqID)
+		return context.WithValue(ctx, "requestID", reqID)
+	}
 }

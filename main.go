@@ -13,6 +13,9 @@ import (
 func main() {
 	ctx := context.Background()
 	logger := log.NewLogfmtLogger(os.Stderr)
+	// Intercepting function which injects the request ID into the request context.
+	option := httptransport.ServerBefore(setRequestIDInContext())
+
 	var svc StringService
 	svc = stringService{}
 	svc = proxyingMiddleware("http://lowercase:80/", logger, ctx)(svc)
@@ -32,6 +35,7 @@ func main() {
 		uppercase,
 		decodeUppercaseRequest,
 		encodeResponse,
+		option,
 	)
 
 	countHandler := httptransport.NewServer(
@@ -39,6 +43,7 @@ func main() {
 		count,
 		decodeCountRequest,
 		encodeResponse,
+		option,
 	)
 
 	lowercaseHandler := httptransport.NewServer(
@@ -46,6 +51,7 @@ func main() {
 		lowercase,
 		decodeLowercaseRequest,
 		encodeResponse,
+		option,
 	)
 
 	http.Handle("/uppercase", uppercaseHandler)
