@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"strings"
+
+	"golang.org/x/net/context"
 )
 
 // ServiceMiddleware Chainable service behaviours
@@ -10,9 +12,9 @@ type ServiceMiddleware func(StringService) StringService
 
 // StringService models our service
 type StringService interface {
-	Uppercase(string) (string, error)
-	Count(string) int
-	Lowercase(string) (string, error)
+	Uppercase(context.Context, string) (string, error)
+	Count(context.Context, string) int
+	Lowercase(context.Context, string) (string, error)
 }
 
 type stringService struct{}
@@ -21,18 +23,18 @@ type stringService struct{}
 var ErrEmpty = errors.New("Empty string")
 
 /// Business logic
-func (stringService) Uppercase(s string) (string, error) {
+func (stringService) Uppercase(_ context.Context, s string) (string, error) {
 	if len(s) == 0 {
 		return "", ErrEmpty
 	}
 	return strings.ToUpper(s), nil
 }
 
-func (stringService) Count(s string) int {
+func (stringService) Count(_ context.Context, s string) int {
 	return len(s)
 }
 
 // Placeholder, we won't use it
-func (stringService) Lowercase(s string) (string, error) {
+func (stringService) Lowercase(_ context.Context, s string) (string, error) {
 	return "", nil
 }

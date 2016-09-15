@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"net"
 	"net/http"
 
 	"io/ioutil"
@@ -44,7 +45,7 @@ type lowercaseResponse struct {
 func makeUppercaseEndpoint(svc StringService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(uppercaseRequest)
-		res, err := svc.Uppercase(req.S)
+		res, err := svc.Uppercase(ctx, req.S)
 		if err != nil {
 			return uppercaseResponse{req.S, err.Error()}, nil
 		}
@@ -55,7 +56,7 @@ func makeUppercaseEndpoint(svc StringService) endpoint.Endpoint {
 func makeCountEndpoint(svc StringService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(countRequest)
-		res := svc.Count(req.S)
+		res := svc.Count(ctx, req.S)
 		return countResponse{res}, nil
 	}
 }
@@ -63,7 +64,7 @@ func makeCountEndpoint(svc StringService) endpoint.Endpoint {
 func makeLowercaseEndpoint(svc StringService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(lowercaseRequest)
-		res, err := svc.Lowercase(req.S)
+		res, err := svc.Lowercase(ctx, req.S)
 		if err != nil {
 			return lowercaseResponse{req.S, err.Error()}, nil
 		}
@@ -132,5 +133,15 @@ func setRequestIDInContext() httptransport.RequestFunc {
 		}
 		request.Header.Set("X-Request-ID", reqID)
 		return context.WithValue(ctx, "requestID", reqID)
+	}
+}
+
+func setClientIPInContext() httptransport.RequestFunc {
+	return func(ctx context.Context, request *http.Request) context.Context {
+		ip := request.Header.Get("X-Forwarded-For")
+		if ip == "" {
+			ip, _, _ = net.SplitHostPort(request.RemoteAddr)
+		}
+		return context.WithValue(ctx, "clientIP", ip)
 	}
 }

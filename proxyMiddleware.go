@@ -15,21 +15,20 @@ import (
 )
 
 type proxy struct {
-	ctx       context.Context
 	next      StringService
 	lowercase endpoint.Endpoint
 }
 
-func (mw proxy) Uppercase(s string) (string, error) {
-	return mw.next.Uppercase(s)
+func (mw proxy) Uppercase(ctx context.Context, s string) (string, error) {
+	return mw.next.Uppercase(ctx, s)
 }
 
-func (mw proxy) Count(s string) int {
-	return mw.next.Count(s)
+func (mw proxy) Count(ctx context.Context, s string) int {
+	return mw.next.Count(ctx, s)
 }
 
-func (mw proxy) Lowercase(s string) (string, error) {
-	response, err := mw.lowercase(mw.ctx, lowercaseRequest{S: s})
+func (mw proxy) Lowercase(ctx context.Context, s string) (string, error) {
+	response, err := mw.lowercase(ctx, lowercaseRequest{S: s})
 	if err != nil {
 		return "", err
 	}
@@ -40,20 +39,20 @@ func (mw proxy) Lowercase(s string) (string, error) {
 	return resp.S, nil
 }
 
-func proxyingMiddleware(proxyURL string, logger log.Logger, ctx context.Context) ServiceMiddleware {
+func proxyingMiddleware(proxyURL string, logger log.Logger) ServiceMiddleware {
 	return func(next StringService) StringService {
-		lowercaseEndpoint := makeLowercaseProxy(proxyURL, ctx)
+		lowercaseEndpoint := makeLowercaseProxy(proxyURL)
 		st := gobreaker.Settings{}
 		st.Name = "StringServiceToLowercase"
 		st.OnStateChange = func(name string, from gobreaker.State, to gobreaker.State) {
 			logger.Log("CircuitBreaker", "from "+from.String()+" to "+to.String())
 		}
 		lowercaseEndpoint = circuitbreaker.Gobreaker(gobreaker.NewCircuitBreaker(st))(lowercaseEndpoint)
-		return proxy{ctx, next, lowercaseEndpoint}
+		return proxy{next, lowercaseEndpoint}
 	}
 }
 
-func makeLowercaseProxy(proxyURL string, ctx context.Context) endpoint.Endpoint {
+func makeLowercaseProxy(proxyURL string) endpoint.Endpoint {
 	if !strings.HasPrefix(proxyURL, "http") {
 		proxyURL = "http://" + proxyURL
 	}

@@ -5,6 +5,8 @@ import (
 
 	"golang.org/x/net/context"
 
+	"time"
+
 	"github.com/go-kit/kit/endpoint"
 )
 
@@ -14,7 +16,10 @@ type TransportMiddleware func(endpoint.Endpoint) endpoint.Endpoint
 func transportLoggingMiddleware(logger log.Logger) TransportMiddleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {
-			logger.Log("requestID", ctx.Value("requestID"))
+			logger.Log("requestID", ctx.Value("requestID"),
+				"timestamp", time.Now().String(),
+				"clientIP", ctx.Value("clientIP"),
+			)
 			return next(ctx, request)
 		}
 	}
