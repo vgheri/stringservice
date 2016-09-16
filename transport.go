@@ -145,3 +145,14 @@ func setClientIPInContext() httptransport.RequestFunc {
 		return context.WithValue(ctx, "clientIP", ip)
 	}
 }
+
+/*
+	Client before functions, applied to the outgoing HTTP requests
+*/
+
+func addRequestIDtoOutgoingHTTPRequest() httptransport.RequestFunc {
+	return func(ctx context.Context, request *http.Request) context.Context {
+		request.Header.Set("X-Request-ID", ctx.Value("requestID").(string))
+		return ctx
+	}
+}

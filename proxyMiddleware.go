@@ -60,10 +60,12 @@ func makeLowercaseProxy(proxyURL string) endpoint.Endpoint {
 	if err != nil {
 		panic(err)
 	}
+	clientOption := httptransport.ClientBefore(addRequestIDtoOutgoingHTTPRequest())
 	return httptransport.NewClient(
-		"GET",
+		"POST",
 		u,
 		encodeRequest,
 		decodeLowercaseResponse,
+		clientOption,
 	).Endpoint()
 }

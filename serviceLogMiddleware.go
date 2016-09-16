@@ -38,8 +38,9 @@ func (mw appLoggingMiddleware) Count(ctx context.Context, s string) (n int) {
 	defer func(begin time.Time) {
 		mw.logger.Log(
 			"method", "count",
-			"input", "s",
-			"count", n,
+			"requestID", ctx.Value("requestID"),
+			"input", s,
+			"output", n,
 			"took", time.Since(begin),
 		)
 	}(time.Now())
@@ -51,6 +52,7 @@ func (mw appLoggingMiddleware) Lowercase(ctx context.Context, s string) (output 
 	defer func(begin time.Time) {
 		mw.logger.Log(
 			"method", "lowercase",
+			"requestID", ctx.Value("requestID"),
 			"input", s,
 			"output", output,
 			"err", err,
