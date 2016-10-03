@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: stringservice
-        image: valeriogheri/stringservice:1.0.1
+        image: valeriogheri/stringservice:latest
         ports:
         - containerPort: 1337
         imagePullPolicy: IfNotPresent

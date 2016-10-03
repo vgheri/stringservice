@@ -19,7 +19,7 @@ func main() {
 
 	var svc StringService
 	svc = stringService{}
-	svc = proxyingMiddleware("http://lowercase:80/", logger)(svc)
+	svc = proxyingMiddleware("http://lowercase.beta:80/", logger)(svc)
 	svc = loggingMiddleware(logger)(svc)
 
 	uppercase := makeUppercaseEndpoint(svc)

@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: linkerd-proxy
+  namespace: beta
+  labels:
+    app: linkerd-proxy
+spec:
+  template:
+    metadata:
+      name: linkerd-proxy
+      labels:
+        app: linkerd-proxy
+    spec:
+      volumes:
+      - name: linkerd-config
+        configMap:
+          name: "linkerd-config"
+      containers:
+        - name: linkerd
+          image: buoyantio/linkerd:latest
+          args:
+          - "/io.buoyant/linkerd/config/config.yaml"
+          ports:
+          - name: ext
+            containerPort: 8080
+          - name: admin
+            containerPort: 9990
+          volumeMounts:
+          - name: "linkerd-config"
+            mountPath: "/io.buoyant/linkerd/config"
+            readOnly: true
+        - name: kubectl
+          image: buoyantio/kubectl:1.2.3
+          args:
+          - "proxy"
+          - "-p"
+          - "8001"

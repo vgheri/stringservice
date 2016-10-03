@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: linkerd
+spec:
+  selector:
+    app: linkerd-proxy
+  type: LoadBalancer
+  ports:
+  - name: ext
+    port: 80
+    targetPort: 8080
+  - name: admin
+    port: 9990
