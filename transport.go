@@ -156,3 +156,10 @@ func addRequestIDtoOutgoingHTTPRequest() httptransport.RequestFunc {
 		return ctx
 	}
 }
+
+func addHeaderToOutgoingHTTPRequest(key, value string) httptransport.RequestFunc {
+	return func(ctx context.Context, request *http.Request) context.Context {
+		request.Header.Set(key, value)
+		return ctx
+	}
+}

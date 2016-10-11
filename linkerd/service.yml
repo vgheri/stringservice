@@ -4,11 +4,12 @@ metadata:
   name: linkerd
 spec:
   selector:
-    app: linkerd-proxy
+    app: linkerd
   type: LoadBalancer
   ports:
-  - name: ext
-    port: 80
-    targetPort: 8080
+  - name: outgoing
+    port: 4140
+  - name: incoming
+    port: 4141
   - name: admin
     port: 9990
