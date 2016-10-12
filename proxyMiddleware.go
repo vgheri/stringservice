@@ -60,7 +60,8 @@ func makeLowercaseProxy(proxyURL string) endpoint.Endpoint {
 	if err != nil {
 		panic(err)
 	}
-	clientOption := httptransport.ClientBefore(addRequestIDtoOutgoingHTTPRequest())
+	clientOption := httptransport.ClientBefore(addRequestIDtoOutgoingHTTPRequest(),
+		addHeaderToOutgoingHTTPRequest("l5d-dst-concrete", "lowercase"))
 	return httptransport.NewClient(
 		"POST",
 		u,

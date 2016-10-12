@@ -11,6 +11,11 @@
         },
         "ports": [
             {
+                "name": "http",
+                "port": 1337
+            },
+            {
+                "name": "external",
                 "protocol": "TCP",
                 "port": 80,
                 "targetPort": 1337

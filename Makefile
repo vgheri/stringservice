@@ -2,7 +2,7 @@
 default: stringservice
 	docker build -f Dockerfile -t valeriogheri/stringservice:latest .
 	docker login -u valeriogheri -p MetopA_2016
-	docker tag valeriogheri/stringservice:latest valeriogheri/stringservice:1.1.2
+	docker tag valeriogheri/stringservice:latest valeriogheri/stringservice:1.2.9
 	docker push valeriogheri/stringservice
 
 stringservice:

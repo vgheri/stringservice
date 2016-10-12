@@ -1,4 +1,4 @@
-FROM scratch
+FROM gliderlabs/alpine
+RUN apk-install bash
 EXPOSE 1337
-ADD stringservice /
-CMD ["/stringservice"]
+COPY stringservice /
