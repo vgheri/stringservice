@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: zipkin
+  labels:
+    app: zipkin
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: zipkin
+    spec:
+      containers:
+      - name: zipkin
+        image: openzipkin/zipkin:latest
+        ports:
+        - name: scribe
+          containerPort: 9410
+        - name: ui
+          containerPort: 9411
+        imagePullPolicy: IfNotPresent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zipkin
+spec:
+  selector:
+    app: zipkin
+  type: LoadBalancer
+  ports:
+  - name: scribe
+    port: 9410
+    targetPort: 9410
+  - name: ui
+    port: 9411
+    targetPort: 9411
